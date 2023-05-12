@@ -1,0 +1,30 @@
+import cirq
+from cirq.circuits import InsertStrategy
+
+# Definir los qubits del circuito cuántico
+qubits = cirq.LineQubit.range(3)
+
+# Definir la transformada de Fourier cuántica
+def qft(qubits):
+    circuit = cirq.Circuit()
+    n = len(qubits)
+    for i in range(n):
+        circuit.append(cirq.H(qubits[i]))
+        for j in range(i+1, n):
+            circuit.append(cirq.CZ(qubits[j], qubits[i])**(1/(j-i+1)))
+        circuit.append(cirq.ops.SingleQubitGate(cirq.Rz(2 * 3.1415 / 2**(i+1))).on(qubits[i]))
+    return circuit
+
+# Crear el circuito cuántico y aplicar la QFT
+circuit = cirq.Circuit()
+circuit.append(qft(qubits))
+
+# Medir los qubits
+circuit.append(cirq.measure(*qubits, key='result'))
+
+# Ejecutar el circuito en un simulador
+simulator = cirq.Simulator()
+result = simulator.run(circuit, repetitions=100)
+
+# Imprimir los resultados de la simulación
+print(result.histogram(key='result'))
